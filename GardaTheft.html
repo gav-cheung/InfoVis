@@ -1,0 +1,285 @@
+<html>
+<head>
+    <title> Garda Assignment </title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+<table style="width: 850px" cellspacing="5" cellpadding="5">
+</table>
+<hr />
+<div id="vis" class="container"></div>
+<script type="text/javascript">
+    var yourVlSpec =  {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "data": {
+            "url": "https://raw.githubusercontent.com/colmr/vis_class/master/Thefts2003-2015.csv",
+            "format": {
+                "type": "csv"
+            }
+        },
+        "title": {
+            "text": "Exploring National Theft Rate 2003-2015",
+            "fontSize": 28,
+            "anchor": "middle"
+        },
+        "hconcat":[
+            {
+                "vconcat": [
+                    {
+                        "data": {
+                            "url": "https://raw.githubusercontent.com/colmr/vis_class/master/Ireland_custom_topjson.json",
+                            "format": {
+                                "type": "topojson",
+                                "feature": "IRL_adm1"
+                            }
+                        },
+                        "width": 600,
+                        "height": 700,
+                        "projection": {
+                            "type": "conicConformal"
+                        },
+                        "layer": [
+                            {
+                                "mark": {
+                                    "type": "geoshape",
+                                    "stroke": "white",
+                                    "fill": "#dcdce0"
+                                }
+                            },
+                            {
+                                "data": {
+                                    "url": "https://raw.githubusercontent.com/colmr/vis_class/master/Thefts2003-2015.csv",
+                                    "format": {
+                                        "type": "csv"
+                                    }
+                                },
+                                "transform": [
+                                    {
+                                        "lookup": "Alternative_Name",
+                                        "from": {
+                                            "data": {
+                                                "url": "https://raw.githubusercontent.com/colmr/vis_class/master/Thefts2003-2015.csv"
+                                            },
+                                            "key": "Station",
+                                            "fields": [
+                                                "Thefts per Station"
+                                            ]
+                                        }
+
+                                    },
+                                    {
+                                    "filter": {
+                                        "param": "brush"
+                                    }
+                                },
+                                    {
+                                        "filter": {
+                                            "param": "pts"
+                                        }
+                                    },
+                                    {
+                                        "joinaggregate":[
+                                            {
+                                                "op":"sum",
+                                                "field":"Thefts",
+                                                "as":"Thefts per Station"
+                                            }
+                                        ],
+                                        "groupby":["Station"]
+                                    }
+                                ],
+                                "mark": "circle",
+                                "encoding": {
+                                    "longitude": {
+                                        "field": "Lon",
+                                        "type": "quantitative"
+                                    },
+                                    "latitude": {
+                                        "field": "Lat",
+                                        "type": "quantitative"
+                                    },
+                                    "color": {
+                                        "field": "Thefts per Station",
+                                        "type": "quantitative",
+                                        "scale": {
+                                            "scheme": "viridis",
+                                            "domain":[100,1000,5000],
+                                            "type":"threshold"
+                                        }
+                                    },
+                                    "size": {
+                                        "field": "Thefts per Station",
+                                        "type": "quantitative",
+                                        "aggregate":"sum",
+                                        "scale": {
+                                            "type":"threshold",
+                                            "domain":[100,1000,5000],
+                                            "range":[10,45,85,170]
+                                        },
+                                        "legend": {
+                                            "title":"Thefts per Station",
+                                            "orient":"top-left",
+                                            "titleFontSize": 20,
+                                            "labelFontSize": 15
+                                        }
+                                    },
+                                    "tooltip": [
+                                        {
+                                            "field": "Station",
+                                            "type": "nominal"
+                                        },
+                                        {
+                                            "field":"Thefts per Station",
+                                            "type":"quantitative"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "data": {
+                                    "url": "https://raw.githubusercontent.com/colmr/vis_class/master/Thefts2003-2015.csv",
+                                    "format": {
+                                        "type": "csv"
+                                    }
+                                },
+
+                                "mark": {
+                                    "type": "text",
+                                    "dx": 10,
+                                    "dy": -15,
+                                    "fontStyle": "bold"
+                                },
+                                "encoding": {
+                                    "longitude": {
+                                        "field": "Lon",
+                                        "type": "quantitative"
+                                    },
+                                    "latitude": {
+                                        "field": "Lat",
+                                        "type": "quantitative"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "width": 600,
+                        "height": 100,
+                        "mark": "area",
+                        "transform":[
+
+                            {
+                                "filter": {
+                                    "param": "pts"
+                                }
+                            }
+                        ],
+                        "encoding": {
+                            "x": {
+                                "timeUnit": "year",
+                                "field": "Year"
+                            },
+                            "y": {
+                                "aggregate": "sum",
+                                "field": "Thefts",
+                                "axis": {"title": "Thefts"}
+                            },
+                            "color": {
+                                "condition": {
+                                    "param": "brush",
+                                    "value": "#9e9e9e"
+                                },
+                                "value": "lightgrey"
+                            }
+                        },
+                        "layer": [
+                            {
+                                "params": [
+                                    {
+                                        "name": "brush",
+                                        "select": {
+                                            "type": "interval",
+                                            "encodings": ["x"]
+                                        }
+                                    }
+                                ],
+                                "mark": {
+                                    "type":"area",
+                                    "fill":"lightgrey"
+                                }
+                            },
+                            {
+                                "transform": [
+                                    {
+                                        "filter": {
+                                            "param": "brush"
+                                        }
+                                    }
+                                ],
+                                "mark": {
+                                    "type": "area",
+                                    "color": "#9e9e9e"
+                                }
+                            }
+                        ]
+                    }
+
+                ]
+            },
+            {
+                "params": [
+                    {
+                    "name": "pts",
+                    "select": {
+                            "type": "point",
+                            "encodings": ["y"]
+                    }
+                }],
+                "width": 150,
+                "height": 830,
+                "mark": "bar",
+                "transform":[
+
+                    {
+                        "filter": {
+                            "param": "brush"
+                        }
+                    }
+                ],
+                "encoding": {
+                    "y": {
+                        "field": "Divisions",
+                        "type": "nominal",
+                        "axis": {
+                            "title": null
+                        },
+                        "sort":"-x"
+                    },
+                    "x": {
+                        "field":"Thefts",
+                        "type": "quantitative",
+                        "axis": {
+                            "title": "Total Thefts by Division"
+                        },
+                        "aggregate": "sum"
+                    },
+                    "color": {
+                        "condition": {
+                            "param": "pts",
+                            "value": "grey"
+                        },
+                        "value": "#b1b0b0"
+                    }
+                }
+            }
+            ]
+    }
+    vegaEmbed("#vis", yourVlSpec);
+</script>
+<hr />
+<table style="width: 850px;" cellspacing="5" cellpadding="5">
+</table>
+</body>
+</html>
